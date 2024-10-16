@@ -1,0 +1,93 @@
+.top-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+
+    .intro {
+        text-align: right;
+        width: 40%;
+        padding-right: 4rem;
+        border-right: 1px solid var(--text-primary);
+
+        h1 {
+            font-size: 9rem;
+            font-weight: bold;
+            line-height: 0.9em;
+            margin: 0;
+        }
+
+        p {
+            font-size: 2rem;
+            margin: 0;
+        }
+    }
+
+    .signature {
+        text-align: left;
+        width: 60%;
+        height: 100%;
+        padding-left: 4rem;
+
+        svg {
+            height: 100%;
+            width: 100%;
+
+            #signature-path {
+                animation: drawSignature 5s linear forwards;
+            }
+        }
+    }
+
+    .social {
+        position: absolute;
+        bottom: 3rem;
+        margin: 0 auto;
+        text-align: center;
+    }
+}
+
+@media screen and (max-width: 1300px) {
+    .top-section {
+
+        .intro {
+            width: 50%;
+
+            h1 {
+                font-size: 7rem;
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .top-section {
+        flex-direction: column;
+
+        .intro {
+            text-align: center;
+            border-bottom: 1px solid var(--text-primary);
+            border-right: none;
+            width: auto;
+            padding: 0;
+            padding-bottom: 2rem;
+
+            h1 {
+                font-size: 5rem;
+            }
+        }
+
+        .signature {
+            height: 30%;
+            padding: 0;
+            padding-top: 2rem;
+        }
+    }
+}
+
+@keyframes drawSignature {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
