@@ -15,7 +15,7 @@ import CircleButton from '../components/CircleButton/CircleButton'; // Adjust th
 const CommonConfig = {
     addFreePalestine: false,
     name: 'reyna patel',
-    tagline: 'future software engineer??',
+    tagline: 'future software engineer(?)',
     signature: {
         viewBox: '0 0 500 500',
         signaturePathD: generateNewSignaturePathD(),
@@ -213,49 +213,81 @@ const WeatherSection = () => {
         </>
     );
 };
+
 const StockPortfolio = () => {
     const [stockData, setStockData] = useState([]);
     const [totalGainLoss, setTotalGainLoss] = useState(0);
-    const apiKey = 'GYDSFWZQS1FFRVNT';
+    const [portfolioValue, setPortfolioValue] = useState(0);
+    const apiKey = 'GYDSFWZQS1FFRVNT'; 
     const symbol = 'SPY';
 
     const portfolio = [
-        { buyPrice: 387.16, currentPrice: 579.21, shares: 1 },
-        { buyPrice: 401.83, currentPrice: 579.21, shares: 1.001 },
-        { buyPrice: 398.75, currentPrice: 579.21, shares: 0.008 },
-        { buyPrice: 397.78, currentPrice: 579.21, shares: 0.009 },
-        { buyPrice: 408.92, currentPrice: 579.21, shares: 10 },
-        { buyPrice: 434.29, currentPrice: 579.21, shares: 0.007 },
-        { buyPrice: 435.03, currentPrice: 579.21, shares: 8 },
-        { buyPrice: 450.91, currentPrice: 579.21, shares: 0.011 },
-        { buyPrice: 440.96, currentPrice: 579.21, shares: 5 },
-        { buyPrice: 398.50, currentPrice: 579.21, shares: 0.02 },
-        { buyPrice: 482.00, currentPrice: 579.21, shares: 0.02 },
-        { buyPrice: 506.25, currentPrice: 579.21, shares: 0.016 },
-        { buyPrice: 518.89, currentPrice: 579.21, shares: 1 },
+        { buyPrice: 387.16, shares: 1 },
+        { buyPrice: 401.83, shares: 1.001 },
+        { buyPrice: 398.75, shares: 0.008 },
+        { buyPrice: 397.78, shares: 0.009 },
+        { buyPrice: 408.92, shares: 10 },
+        { buyPrice: 434.29, shares: 0.007 },
+        { buyPrice: 435.03, shares: 8 },
+        { buyPrice: 450.91, shares: 0.011 },
+        { buyPrice: 440.96, shares: 5 },
+        { buyPrice: 398.50, shares: 0.02 },
+        { buyPrice: 482.00, shares: 0.02 },
+        { buyPrice: 506.25, shares: 0.016 },
+        { buyPrice: 518.89, shares: 1 },
     ];
 
     useEffect(() => {
-        // Calculate total gain/loss based on portfolio
-        let totalCost = 0;
-        let totalGainLoss = 0;
+        const fetchCurrentPrice = async () => {
+            try {
+                const response = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${apiKey}`);
+                const data = await response.json();
 
-        portfolio.forEach((stock) => {
-            const cost = stock.buyPrice * stock.shares;
-            const currentValue = stock.currentPrice * stock.shares;
-            const gainLoss = currentValue - cost;
+                // Get the latest price from the data
+                const timeSeries = data['Time Series (5min)'];
+                const latestTime = Object.keys(timeSeries)[0];
+                const latestPrice = parseFloat(timeSeries[latestTime]['1. open']); // Open price, change if needed
 
-            totalCost += cost;
-            totalGainLoss += gainLoss;
+                return latestPrice;
+            } catch (error) {
+                console.error("Error fetching stock price:", error);
+                return null;
+            }
+        };
 
-            // Update stock data with gain/loss
-            stock.totalCost = cost;
-            stock.gainLoss = gainLoss;
-        });
+        const calculatePortfolio = async () => {
+            const currentPrice = await fetchCurrentPrice();
+            if (currentPrice !== null) {
+                let totalCost = 0;
+                let totalGainLoss = 0;
+                let totalPortfolioValue = 0;
 
-        setStockData(portfolio);
-        setTotalGainLoss(totalGainLoss);
-    }, []);
+                const updatedPortfolio = portfolio.map(stock => {
+                    const cost = stock.buyPrice * stock.shares;
+                    const currentValue = currentPrice * stock.shares;
+                    const gainLoss = currentValue - cost;
+
+                    totalCost += cost;
+                    totalGainLoss += gainLoss;
+                    totalPortfolioValue += currentValue;
+
+                    return {
+                        ...stock,
+                        currentPrice,
+                        totalCost: cost,
+                        gainLoss,
+                        currentValue
+                    };
+                });
+
+                setStockData(updatedPortfolio);
+                setTotalGainLoss(totalGainLoss);
+                setPortfolioValue(totalPortfolioValue);
+            }
+        };
+
+        calculatePortfolio();
+    }, [apiKey, symbol]);
 
     return (
         <div>
@@ -276,19 +308,19 @@ const StockPortfolio = () => {
                         <tr key={index}>
                             <td>{symbol}</td>
                             <td>${stock.buyPrice.toFixed(2)}</td>
-                            <td>${stock.currentPrice.toFixed(2)}</td>
+                            <td>${stock.currentPrice ? stock.currentPrice.toFixed(2) : 'Loading...'}</td>
                             <td>{stock.shares.toFixed(3)}</td>
-                            <td>${stock.totalCost.toFixed(2)}</td>
-                            <td>${stock.gainLoss.toFixed(2)}</td>
+                            <td>${stock.totalCost ? stock.totalCost.toFixed(2) : 'Loading...'}</td>
+                            <td>${stock.gainLoss ? stock.gainLoss.toFixed(2) : 'Loading...'}</td>
                         </tr>
                     ))}
                 </tbody>
             </table>
+            <h3>Total Portfolio Value: ${portfolioValue.toFixed(2)}</h3>
             <h3>Total Gain: ${totalGainLoss.toFixed(2)}</h3>
         </div>
     );
 };
-
 
 /** Config for sections */
 const CustomSectionsConfig = [
