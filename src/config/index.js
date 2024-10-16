@@ -106,6 +106,31 @@ const ProjectsConfig = {
     ]
 };
 
+const BotpressChat = () => {
+    useEffect(() => {
+        const script1 = document.createElement('script');
+        script1.src = "https://cdn.botpress.cloud/webchat/v2.2/inject.js";
+        script1.async = true;
+
+        const script2 = document.createElement('script');
+        script2.src = "https://files.bpcontent.cloud/2024/10/16/15/20241016150925-37L2Z2H7.js";
+        script2.async = true;
+
+        document.body.appendChild(script1);
+        document.body.appendChild(script2);
+
+        return () => {
+            document.body.removeChild(script1);
+            document.body.removeChild(script2);
+        };
+    }, []);
+
+    return (
+        <div id="botpress-chat" />
+    );
+};
+
+export default BotpressChat;
 
 
 // WeatherSection Component
@@ -415,6 +440,13 @@ const CustomSectionsConfig = [
                 </p>
             </>
         )
+    },
+    {
+        name: '',
+        headerIcon: <InfoIcon />,  
+        extraClass: '',
+        notInMenu: false,
+        content: <BotpressChat />
     }
 ];
 
